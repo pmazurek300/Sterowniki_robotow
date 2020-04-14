@@ -59,6 +59,16 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+	if(htim == &htim3){
+
+		char buff[15];
+		uint8_t len;
+		len = sprintf(buff,"Witaj swiecie\r\n");
+		HAL_UART_Transmit(&huart2, (uint8_t*)buff, len,15);
+	}
+}
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	flag=1;
