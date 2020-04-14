@@ -132,10 +132,26 @@ int main(void)
 			  break;
 
 		  case 3: // do tylu
+			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10, GPIO_PIN_RESET);
 
+			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);
+
+			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,6000);
+			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,6000);
 			  break;
 
-		  default:
+		  default: //zatrzymanie
+			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10, GPIO_PIN_RESET);
+
+			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
+
+			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,0);
+			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,0);
+
 			  flag = 0;
 			  break;
 		  }
