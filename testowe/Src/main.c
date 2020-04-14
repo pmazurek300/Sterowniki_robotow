@@ -99,6 +99,9 @@ int main(void)
   MX_TIM4_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start(&htim4);
+  HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
 
   HAL_UART_Receive_IT(&huart2, &Received, 1);
   /* USER CODE END 2 */
@@ -110,7 +113,14 @@ int main(void)
 	  if(flag == 1){
 		  switch (atoi(&Received)){
 		  case 0: // do przodu
+			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10, GPIO_PIN_SET);
 
+			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
+
+			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,6000);
+			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,6000);
 			  break;
 
 		  case 1: // w lewo
@@ -126,7 +136,6 @@ int main(void)
 			  break;
 
 		  default:
-
 			  flag = 0;
 			  break;
 		  }
