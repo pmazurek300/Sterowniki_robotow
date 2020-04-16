@@ -28,6 +28,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,6 +52,7 @@ volatile float Hcsr04_Distance_tmp;
 uint8_t Received;
 uint8_t flag;
 int pwm_duty;
+volatile int H_sum;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,7 +72,12 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
 	time = __HAL_TIM_GetCompare(&htim3, TIM_CHANNEL_2) -__HAL_TIM_GetCompare(&htim3, TIM_CHANNEL_1);
 	if(time < 23615) {
 		Hcsr04_Distance_tmp = (float)time / 2.0 * 0.0343;
-		len = sprintf(buff,"%.2f\r\n" ,Hcsr04_Distance_tmp);
+		len = sprintf(buff,"%.2f ",Hcsr04_Distance_tmp);
+		for(int i =0; i<strlen(buff);i++){
+			H_sum +=buff[i];
+		}
+		H_sum = H_sum %37;
+		len = sprintf(buff,"%.2f #%d\r\n" ,Hcsr04_Distance_tmp,H_sum);
 		HAL_UART_Transmit(&huart2, (uint8_t*)buff, len,15);
 	}
 	}
@@ -91,6 +98,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	flag=0;
+	H_sum = 0;
 	pwm_duty=0;
   /* USER CODE END 1 */
 
