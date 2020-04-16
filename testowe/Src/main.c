@@ -160,11 +160,29 @@ int main(void)
 			  break;
 
 		  case 1: // w lewo
+			  HAL_GPIO_WritePin(Dc_IN4_GPIO_Port, Dc_IN4_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(Dc_IN3_GPIO_Port, Dc_IN3_Pin, GPIO_PIN_RESET);
 
+			  HAL_GPIO_WritePin(Dc_IN1_GPIO_Port, Dc_IN1_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(Dc_IN2_GPIO_Port, Dc_IN2_Pin, GPIO_PIN_RESET);
+			  if(pwm_duty <6000){
+				  pwm_duty +=10;
+			  }
+			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,pwm_duty);
+			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,pwm_duty);
 			  break;
 
 		  case 2: //  w prawo
+			  HAL_GPIO_WritePin(Dc_IN4_GPIO_Port, Dc_IN4_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(Dc_IN3_GPIO_Port, Dc_IN3_Pin, GPIO_PIN_SET);
 
+			  HAL_GPIO_WritePin(Dc_IN1_GPIO_Port, Dc_IN1_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(Dc_IN2_GPIO_Port, Dc_IN2_Pin, GPIO_PIN_SET);
+			  if(pwm_duty <6000){
+				  pwm_duty +=10;
+			  }
+			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,pwm_duty);
+			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,pwm_duty);
 			  break;
 
 		  case 3: // do tylu
