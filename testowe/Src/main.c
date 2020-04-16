@@ -20,6 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -46,9 +47,10 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+volatile float Hcsr04_Distance_tmp;
 uint8_t Received;
 uint8_t flag;
-
+int pwm_duty;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -59,20 +61,24 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
-{
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
 	if(htim == &htim3){
+	uint16_t time;
+	char buff[25];
+	uint8_t len;
 
-		char buff[15];
-		uint8_t len;
-		len = sprintf(buff,"Witaj swiecie\r\n");
+	time = __HAL_TIM_GetCompare(&htim3, TIM_CHANNEL_2) -__HAL_TIM_GetCompare(&htim3, TIM_CHANNEL_1);
+	if(time < 23615) {
+		Hcsr04_Distance_tmp = (float)time / 2.0 * 0.0343;
+		len = sprintf(buff,"%.2f\r\n" ,Hcsr04_Distance_tmp);
 		HAL_UART_Transmit(&huart2, (uint8_t*)buff, len,15);
+	}
 	}
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	flag=1;
-	HAL_UART_Receive_IT(&huart2, &Received, 1);
+	HAL_UART_Receive_DMA(&huart2, &Received, 1);
  }
 
 /* USER CODE END 0 */
@@ -85,6 +91,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	flag=0;
+	pwm_duty=0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -105,16 +112,22 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+
   HAL_TIM_Base_Start(&htim4);
   HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
 
   HAL_TIM_Base_Start(&htim3);
-  HAL_UART_Receive_IT(&huart2, &Received, 1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+  HAL_TIM_IC_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2);
+
+  HAL_UART_Receive_DMA(&huart2, &Received, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -124,14 +137,26 @@ int main(void)
 	  if(flag == 1){
 		  switch (atoi(&Received)){
 		  case 0: // do przodu
-			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_RESET);
-			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10, GPIO_PIN_SET);
+			  if(Hcsr04_Distance_tmp >= 50){
+				  HAL_GPIO_WritePin(Dc_IN4_GPIO_Port, Dc_IN4_Pin, GPIO_PIN_RESET);
+				  HAL_GPIO_WritePin(Dc_IN3_GPIO_Port, Dc_IN3_Pin, GPIO_PIN_SET);
 
-			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
-			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
+				  HAL_GPIO_WritePin(Dc_IN1_GPIO_Port, Dc_IN1_Pin, GPIO_PIN_SET);
+				  HAL_GPIO_WritePin(Dc_IN2_GPIO_Port, Dc_IN2_Pin, GPIO_PIN_RESET);
 
-			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,6000);
-			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,6000);
+				  if(pwm_duty <6000){
+					  pwm_duty +=10;
+				  }
+				  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,pwm_duty);
+				  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,pwm_duty);
+			  }
+			  else{
+				  HAL_GPIO_WritePin(Dc_IN3_GPIO_Port, Dc_IN3_Pin, GPIO_PIN_RESET);
+				  HAL_GPIO_WritePin(Dc_IN1_GPIO_Port, Dc_IN1_Pin, GPIO_PIN_RESET);
+
+				  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,0);
+				  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,0);
+			  }
 			  break;
 
 		  case 1: // w lewo
@@ -143,37 +168,41 @@ int main(void)
 			  break;
 
 		  case 3: // do tylu
-			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_SET);
-			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(Dc_IN4_GPIO_Port, Dc_IN4_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(Dc_IN3_GPIO_Port, Dc_IN3_Pin, GPIO_PIN_RESET);
 
-			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);
-
-			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,6000);
-			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,6000);
+			  HAL_GPIO_WritePin(Dc_IN1_GPIO_Port, Dc_IN1_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(Dc_IN2_GPIO_Port, Dc_IN2_Pin, GPIO_PIN_SET);
+			  if(pwm_duty <6000){
+				  pwm_duty +=10;
+			  }
+			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,pwm_duty);
+			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,pwm_duty);
 			  break;
 
-		  default: //zatrzymanie
-			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_RESET);
-			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10, GPIO_PIN_RESET);
+		  default:
+			  HAL_GPIO_WritePin(Dc_IN4_GPIO_Port, Dc_IN4_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(Dc_IN3_GPIO_Port, Dc_IN3_Pin, GPIO_PIN_RESET);
 
-			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(Dc_IN1_GPIO_Port, Dc_IN1_Pin, GPIO_PIN_RESET);
+			  HAL_GPIO_WritePin(Dc_IN2_GPIO_Port, Dc_IN2_Pin, GPIO_PIN_RESET);
 
 			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,0);
 			  __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,0);
 
+			  pwm_duty=0;
 			  flag = 0;
 			  break;
 		  }
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 	  }
 	  HAL_Delay(10);
   /* USER CODE END 3 */
-  }
 }
+
 /**
   * @brief System Clock Configuration
   * @retval None
