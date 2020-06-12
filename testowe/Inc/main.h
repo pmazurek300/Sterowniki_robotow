@@ -29,6 +29,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
+#include "stm32f4xx_hal.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -84,22 +85,32 @@ void Error_Handler(void);
 #define Hc_TRIG_GPIO_Port GPIOB
 #define CLK_IN_Pin GPIO_PIN_10
 #define CLK_IN_GPIO_Port GPIOB
-#define Dc_IN3_Pin GPIO_PIN_10
-#define Dc_IN3_GPIO_Port GPIOD
-#define Dc_IN4_Pin GPIO_PIN_11
-#define Dc_IN4_GPIO_Port GPIOD
+#define En_STEPPER_UPPER_Pin GPIO_PIN_9
+#define En_STEPPER_UPPER_GPIO_Port GPIOD
+#define En_STEPPER_LOWER_Pin GPIO_PIN_10
+#define En_STEPPER_LOWER_GPIO_Port GPIOD
+#define Dc_IN2_Pin GPIO_PIN_11
+#define Dc_IN2_GPIO_Port GPIOD
 #define Dc_ENB_Pin GPIO_PIN_12
 #define Dc_ENB_GPIO_Port GPIOD
 #define Dc_ENA_Pin GPIO_PIN_13
 #define Dc_ENA_GPIO_Port GPIOD
-#define Dc_IN2_Pin GPIO_PIN_14
-#define Dc_IN2_GPIO_Port GPIOD
+#define Dc_ENABLE_DRIVER_Pin GPIO_PIN_14
+#define Dc_ENABLE_DRIVER_GPIO_Port GPIOD
 #define Dc_IN1_Pin GPIO_PIN_15
 #define Dc_IN1_GPIO_Port GPIOD
-#define I2S3_MCK_Pin GPIO_PIN_7
-#define I2S3_MCK_GPIO_Port GPIOC
-#define VBUS_FS_Pin GPIO_PIN_9
-#define VBUS_FS_GPIO_Port GPIOA
+#define Step_STEPPER_LOWER_Pin GPIO_PIN_6
+#define Step_STEPPER_LOWER_GPIO_Port GPIOC
+#define Dir_STEPPER_LOWER_Pin GPIO_PIN_7
+#define Dir_STEPPER_LOWER_GPIO_Port GPIOC
+#define Step_STEPPER_UPPER_Pin GPIO_PIN_8
+#define Step_STEPPER_UPPER_GPIO_Port GPIOC
+#define Dir_STEPPER_UPPER_Pin GPIO_PIN_9
+#define Dir_STEPPER_UPPER_GPIO_Port GPIOC
+#define Servo_JOINT_Pin GPIO_PIN_8
+#define Servo_JOINT_GPIO_Port GPIOA
+#define Servo_EFFECTOR_Pin GPIO_PIN_9
+#define Servo_EFFECTOR_GPIO_Port GPIOA
 #define OTG_FS_ID_Pin GPIO_PIN_10
 #define OTG_FS_ID_GPIO_Port GPIOA
 #define OTG_FS_DM_Pin GPIO_PIN_11
@@ -120,10 +131,10 @@ void Error_Handler(void);
 #define OTG_FS_OverCurrent_GPIO_Port GPIOD
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
-#define Audio_SCL_Pin GPIO_PIN_6
-#define Audio_SCL_GPIO_Port GPIOB
-#define Audio_SDA_Pin GPIO_PIN_9
-#define Audio_SDA_GPIO_Port GPIOB
+#define EEPROM_SCL_Pin GPIO_PIN_6
+#define EEPROM_SCL_GPIO_Port GPIOB
+#define EEPROM_SDA_Pin GPIO_PIN_9
+#define EEPROM_SDA_GPIO_Port GPIOB
 #define MEMS_INT2_Pin GPIO_PIN_1
 #define MEMS_INT2_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */
