@@ -650,17 +650,17 @@ int main(void) {
 				break;
 
 			case 13:
-//				token=strtok(NULL," ");
-//				target.x=atof(token);
-//				token=strtok(NULL," ");
-//				target.y=atof(token);
-//				token=strtok(NULL, " ");
-//				target.z=atof(token);
-//				free(token);
+				token=strtok(NULL," ");
+				target.x=atof(token);
+				token=strtok(NULL," ");
+				target.y=atof(token);
+				token=strtok(NULL, " ");
+				target.z=atof(token);
+				free(token);
 
-				target.x=10;
-				target.y=12;
-				target.z=22;
+//				target.x=10;
+//				target.y=12;
+//				target.z=22;
 				Fabrik(target);
 				a = step_dolnego_fabrik;
 				b = step_gornego_fabrik;
