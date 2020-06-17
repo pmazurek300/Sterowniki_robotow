@@ -352,7 +352,31 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		}
 	}
 	if (htim == &htim11) {
+		if (flag == 1 && flaga_gornego_stepp == 1 && step_gornego > 0) {
+			if (out_gornego_stepp) {
+				out_gornego_stepp = 0;
+				HAL_GPIO_WritePin(Step_STEPPER_UPPER_GPIO_Port,
+				Step_STEPPER_UPPER_Pin, GPIO_PIN_RESET);
+			} else {
+				out_gornego_stepp = 1;
+				step_gornego--;
+				HAL_GPIO_WritePin(Step_STEPPER_UPPER_GPIO_Port,
+				Step_STEPPER_UPPER_Pin, GPIO_PIN_SET);
 
+			}
+		} else if (flag == 1 && flaga_gornego_stepp == 2
+				&& step_gornego < 116) {
+			if (out_gornego_stepp) {
+				out_gornego_stepp = 0;
+				HAL_GPIO_WritePin(Step_STEPPER_UPPER_GPIO_Port,
+				Step_STEPPER_UPPER_Pin, GPIO_PIN_RESET);
+			} else {
+				out_gornego_stepp = 1;
+				step_gornego++;
+				HAL_GPIO_WritePin(Step_STEPPER_UPPER_GPIO_Port,
+				Step_STEPPER_UPPER_Pin, GPIO_PIN_SET);
+			}
+		}
 	}
 	if (htim == &htim10) {
 		printf("X %.2f #%d \r\n", Hcsr04_Distance_tmp, H_sum);
