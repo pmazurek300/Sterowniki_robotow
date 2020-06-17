@@ -407,9 +407,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		}
 	}
 	if (htim == &htim10) {
-		printf("X %.2f #%d %d %d %f %f %f %s \r\n", Hcsr04_Distance_tmp, H_sum,
-				step_dolnego, step_gornego, a, b, s,tmp);
-//		printf("X %s 2 \r\n",tmp);
+		printf("X %.2f #%d \r\n", Hcsr04_Distance_tmp, H_sum);
 
 	}
 	if (htim == &htim9) {
@@ -536,7 +534,7 @@ int main(void) {
 		if (flag == 1) {
 			token =strtok(Received, " ");
 			switch (atoi(token)) {
-			case 0: // do przodu
+			case 0:
 				if (Hcsr04_Distance_tmp >= 50) {
 					HAL_GPIO_WritePin(Dc_IN1_GPIO_Port, Dc_IN1_Pin,
 							GPIO_PIN_RESET);
@@ -561,7 +559,7 @@ int main(void) {
 				}
 				break;
 
-			case 1: // w lewo
+			case 1:
 				HAL_GPIO_WritePin(Dc_IN1_GPIO_Port, Dc_IN1_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(Dc_IN2_GPIO_Port, Dc_IN2_Pin, GPIO_PIN_SET);
 
@@ -573,7 +571,7 @@ int main(void) {
 				__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, pwm_duty);
 				break;
 
-			case 2: //  w prawo
+			case 2:
 				HAL_GPIO_WritePin(Dc_IN1_GPIO_Port, Dc_IN1_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(Dc_IN2_GPIO_Port, Dc_IN2_Pin, GPIO_PIN_RESET);
 
@@ -585,7 +583,7 @@ int main(void) {
 				__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, pwm_duty);
 				break;
 
-			case 3: // do tylu
+			case 3:
 				HAL_GPIO_WritePin(Dc_IN1_GPIO_Port, Dc_IN1_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(Dc_IN2_GPIO_Port, Dc_IN2_Pin, GPIO_PIN_SET);
 
