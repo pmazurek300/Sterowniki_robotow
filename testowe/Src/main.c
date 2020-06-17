@@ -630,19 +630,25 @@ int main(void) {
 				break;
 
 			case 9:
-
+				flaga_servo_effector = 1;
 				break;
 
 			case 10:
-
+				flaga_servo_effector = 2;
 				break;
 
 			case 11:
-
+				flaga_gornego_stepp = 1;
+				HAL_GPIO_WritePin(Dir_STEPPER_UPPER_GPIO_Port,
+				Dir_STEPPER_UPPER_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(En_STEPPER_UPPER_GPIO_Port,
+				En_STEPPER_UPPER_Pin, GPIO_PIN_SET);
 				break;
 
 			case 12:
-
+				HAL_GPIO_WritePin(En_STEPPER_UPPER_GPIO_Port,
+				En_STEPPER_UPPER_Pin, GPIO_PIN_RESET);
+				step_gornego = 116;
 				break;
 
 			case 13:
