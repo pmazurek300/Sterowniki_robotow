@@ -111,7 +111,138 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void Fabrik(struct Vector3D target) {
+	alfa = (step_dolnego % 12900) * 360.00 / 12900.00;
+	beta = step_gornego * 360.00 / 200.00;
+	sigma = (pwm_duty_servo_joint - 250.00) * 180.00 / 1000.00 + 90.00;
 
+	p[1].x = cosf(alfa * M_PI / 180.00) * cosf(beta * M_PI / 180.00) * L1;
+	p[1].y = sinf(alfa * M_PI / 180.0) * cosf(beta * M_PI / 180.0) * L1;
+	p[1].z = podstawa + cosf((90.0 - beta) * M_PI / 180.0) * L1;
+	p[2].x = cosf(alfa * M_PI / 180.0)
+			* (cosf(beta * M_PI / 180.0) * L1
+					+ sinf((beta + sigma - 90.0) * M_PI / 180.0) * L2);
+	p[2].y = sinf(alfa * M_PI / 180.0)
+			* (cosf(beta * M_PI / 180.0) * L1
+					+ sinf((beta + sigma - 90.0) * M_PI / 180.0) * L2);
+	p[2].z = podstawa + cosf((90.0 - beta) * M_PI / 180.0) * L1
+			- cosf((beta + sigma - 90.0) * M_PI / 180.0) * L2;
+	float R[3];
+	float Lambda[3];
+
+	float D[2];
+	D[0] = sqrt(
+			pow((p[1].x - p[0].x), 2) + pow((p[1].y - p[0].y), 2)
+					+ pow((p[1].z - p[0].z), 2));
+	D[1] = sqrt(
+			pow((p[2].x - p[1].x), 2) + pow((p[2].y - p[1].y), 2)
+					+ pow((p[2].z - p[1].z), 2));
+
+	float Dist = sqrt(
+			pow((p[0].x - target.x), 2) + pow((p[0].y - target.y), 2)
+					+ pow((p[0].z - target.z), 2));
+
+	struct Vector3D B;
+
+	float DifA;
+
+	float Tol = 0.000001;
+
+	if (Dist > D[0] + D[1]) {
+		for (int i = 0; i < 3; i++) {
+			R[i] = sqrt(
+					pow((target.x - p[i].x), 2) + pow((target.y - p[i].y), 2)
+							+ pow((target.z - p[i].z), 2));
+			Lambda[i] = D[i] / R[i];
+
+			if (i > 0) {
+				p[i].x = (1 - Lambda[i - 1]) * p[i - 1].x
+						+ Lambda[i - 1] * target.x;
+				p[i].y = (1 - Lambda[i - 1]) * p[i - 1].y
+						+ Lambda[i - 1] * target.y;
+				p[i].z = (1 - Lambda[i - 1]) * p[i - 1].z
+						+ Lambda[i - 1] * target.z;
+			}
+		}
+	} else {
+		B.x = p[0].x;
+		B.y = p[0].y;
+		B.z = p[0].z;
+
+		DifA = sqrt(
+				pow((p[2].x - target.x), 2) + pow((p[2].y - target.y), 2)
+						+ pow((p[2].z - target.z), 2));
+		while (DifA > Tol) {
+			float tmp = DifA;
+
+			p[2].x = target.x;
+			p[2].y = target.y;
+			p[2].z = target.z;
+
+			for (int i = 1; i > -1; i--) {
+				R[i] = sqrt(
+						pow((p[i + 1].x - p[i].x), 2)
+								+ pow((p[i + 1].y - p[i].y), 2)
+								+ pow((p[i + 1].z - p[i].z), 2));
+				Lambda[i] = D[i] / R[i];
+				p[i].x = (1 - Lambda[i]) * p[i + 1].x + Lambda[i] * p[i].x;
+				p[i].y = (1 - Lambda[i]) * p[i + 1].y + Lambda[i] * p[i].y;
+				p[i].z = (1 - Lambda[i]) * p[i + 1].z + Lambda[i] * p[i].z;
+			}
+
+			p[0].x = B.x;
+			p[0].y = B.y;
+			p[0].z = B.z;
+
+			for (int i = 0; i < 2; i++) {
+				R[i] = sqrt(
+						pow((p[i + 1].x - p[i].x), 2)
+								+ pow((p[i + 1].y - p[i].y), 2)
+								+ pow((p[i + 1].z - p[i].z), 2));
+				Lambda[i] = D[i] / R[i];
+				p[i + 1].x = (1 - Lambda[i]) * p[i].x + Lambda[i] * p[i + 1].x;
+				p[i + 1].y = (1 - Lambda[i]) * p[i].y + Lambda[i] * p[i + 1].y;
+				p[i + 1].z = (1 - Lambda[i]) * p[i].z + Lambda[i] * p[i + 1].z;
+			}
+
+			DifA = sqrt(
+					pow((p[2].x - target.x), 2) + pow((p[2].y - target.y), 2)
+							+ pow((p[2].z - target.z), 2));
+			if (tmp == DifA) {
+				break;
+			}
+		}
+	}
+	if (target.x > 0 && target.y > 0) {
+		alfa = atanf(p[2].y / p[2].x) * 180 / M_PI;
+	} else if (target.x < 0 && target.y > 0) {
+		alfa = -atanf(p[2].y / p[2].x) * 180 / M_PI + 90.0;
+	} else if (target.x < 0 && target.y < 0) {
+		alfa = atanf(p[2].y / p[2].x) * 180 / M_PI + 180.0;
+	} else if (target.x > 0 && target.y < 0) {
+		alfa = -atanf(p[2].y / p[2].x) * 180 / M_PI + 270.0;
+	} else if (target.x == 0 && target.y == 0) {
+		alfa = 0.0;
+	} else if (target.x > 0 && target.y == 0) {
+		alfa = 0.0;
+	} else if (target.x == 0 && target.y > 0) {
+		alfa = 90.0;
+	} else if (target.x < 0 && target.y == 0) {
+		alfa = 180.0;
+	} else if (target.x == 0 && target.y < 0) {
+		alfa = 270.0;
+	}
+	beta = acosf(sqrt(pow(p[1].x, 2) + pow(p[1].y, 2)) / L1) * 180 / M_PI;
+		sigma = asinf(sqrt(pow(p[1].x, 2) + pow(p[1].y, 2)) / L1) * 180 / M_PI + asinf((sqrt(pow(p[2].x, 2) + pow(p[2].y, 2)) - sqrt(pow(p[1].x, 2) + pow(p[1].y, 2))) / L2) * 180 / M_PI;
+
+	step_dolnego_fabrik = alfa * 12900.00 / 360.00;
+	step_gornego_fabrik = beta * 200.00 / 360.00;
+	pwm_duty_servo_joint = sigma * 1000.00 / 180.00 + 250.00;
+	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm_duty_servo_joint);
+
+
+
+}
 
 int _write(int file, char *ptr, int len) {
 	HAL_UART_Transmit(&huart2, (uint8_t*) ptr, len, 50);
@@ -285,7 +416,7 @@ int main(void) {
 		if (flag == 1) {
 			token =strtok(Received, " ");
 			switch (atoi(token)) {
-			case 0:
+			case 0: // do przodu
 				if (Hcsr04_Distance_tmp >= 50) {
 					HAL_GPIO_WritePin(Dc_IN1_GPIO_Port, Dc_IN1_Pin,
 							GPIO_PIN_RESET);
@@ -310,7 +441,7 @@ int main(void) {
 				}
 				break;
 
-			case 1:
+			case 1: // w lewo
 				HAL_GPIO_WritePin(Dc_IN1_GPIO_Port, Dc_IN1_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(Dc_IN2_GPIO_Port, Dc_IN2_Pin, GPIO_PIN_SET);
 
@@ -322,7 +453,7 @@ int main(void) {
 				__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, pwm_duty);
 				break;
 
-			case 2:
+			case 2: //  w prawo
 				HAL_GPIO_WritePin(Dc_IN1_GPIO_Port, Dc_IN1_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(Dc_IN2_GPIO_Port, Dc_IN2_Pin, GPIO_PIN_RESET);
 
@@ -334,7 +465,7 @@ int main(void) {
 				__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, pwm_duty);
 				break;
 
-			case 3:
+			case 3: // do tylu
 				HAL_GPIO_WritePin(Dc_IN1_GPIO_Port, Dc_IN1_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(Dc_IN2_GPIO_Port, Dc_IN2_Pin, GPIO_PIN_SET);
 
@@ -414,7 +545,7 @@ int main(void) {
 			/* USER CODE BEGIN 3 */
 			//  HAL_Delay(10);
 		}
-		if(flaga_dolnego_stepp ==0 ){
+		if(flaga_dolnego_stepp ==0 && flaga_fabrik_dolny ==0){
 			HAL_GPIO_WritePin(En_STEPPER_LOWER_GPIO_Port,
 			En_STEPPER_LOWER_Pin, GPIO_PIN_RESET);
 		}
