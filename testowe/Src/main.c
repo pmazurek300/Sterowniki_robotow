@@ -240,7 +240,33 @@ void Fabrik(struct Vector3D target) {
 	pwm_duty_servo_joint = sigma * 1000.00 / 180.00 + 250.00;
 	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm_duty_servo_joint);
 
+	if (step_dolnego > step_dolnego_fabrik) {
+		HAL_GPIO_WritePin(Dir_STEPPER_LOWER_GPIO_Port, Dir_STEPPER_LOWER_Pin,
+				GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(En_STEPPER_LOWER_GPIO_Port, En_STEPPER_LOWER_Pin,
+				GPIO_PIN_SET);
+		flaga_fabrik_dolny = 1;
+	} else if (step_dolnego < step_dolnego_fabrik) {
+		HAL_GPIO_WritePin(Dir_STEPPER_LOWER_GPIO_Port, Dir_STEPPER_LOWER_Pin,
+				GPIO_PIN_SET);
+		HAL_GPIO_WritePin(En_STEPPER_LOWER_GPIO_Port, En_STEPPER_LOWER_Pin,
+				GPIO_PIN_SET);
+		flaga_fabrik_dolny = 2;
+	}
 
+	if (step_gornego > step_gornego_fabrik) {
+		HAL_GPIO_WritePin(Dir_STEPPER_UPPER_GPIO_Port, Dir_STEPPER_UPPER_Pin,
+				GPIO_PIN_SET);
+		HAL_GPIO_WritePin(En_STEPPER_UPPER_GPIO_Port, En_STEPPER_UPPER_Pin,
+				GPIO_PIN_SET);
+		flaga_fabrik_gorny = 1;
+	} else if (step_gornego < step_gornego_fabrik) {
+		HAL_GPIO_WritePin(Dir_STEPPER_UPPER_GPIO_Port, Dir_STEPPER_UPPER_Pin,
+				GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(En_STEPPER_UPPER_GPIO_Port, En_STEPPER_UPPER_Pin,
+				GPIO_PIN_SET);
+		flaga_fabrik_gorny = 2;
+	}
 
 }
 
