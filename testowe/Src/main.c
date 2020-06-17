@@ -466,7 +466,9 @@ int main(void) {
 	char *token;
 
 
-
+	p[0].x = 0;
+	p[0].y = 0;
+	p[0].z = podstawa;
 	/* USER CODE END 1 */
 
 	/* MCU Configuration--------------------------------------------------------*/
@@ -519,7 +521,11 @@ int main(void) {
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
 
 	HAL_UART_Receive_DMA(&huart2, Received, 15);
-
+	HAL_I2C_Mem_Read(&hi2c1, 0xa0, 0x10, 1, (uint16_t*) &odczyt, sizeof(odczyt),
+			50);
+	pwm_duty_servo_joint = odczyt[1];
+	step_dolnego = odczyt[0];
+	step_gornego = odczyt[2];
 	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm_duty_servo_joint);
 
 	/* USER CODE END 2 */
@@ -664,7 +670,11 @@ int main(void) {
 			En_STEPPER_LOWER_Pin, GPIO_PIN_RESET);
 		}
 
-
+			zapis[0] = step_dolnego;
+			zapis[1] = pwm_duty_servo_joint;
+			zapis[2] = step_gornego;
+			HAL_I2C_Mem_Write(&hi2c1, 0xa0, 0x10, 1, (uint16_t*) &zapis,
+					sizeof(zapis), 50);
 	}
 
 	/* USER CODE END 3 */
