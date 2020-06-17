@@ -376,6 +376,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 				HAL_GPIO_WritePin(Step_STEPPER_UPPER_GPIO_Port,
 				Step_STEPPER_UPPER_Pin, GPIO_PIN_SET);
 			}
+		}else if (flaga_fabrik_gorny == 1) {
+			if (out_gornego_stepp) {
+				out_gornego_stepp = 0;
+				HAL_GPIO_WritePin(Step_STEPPER_UPPER_GPIO_Port,
+				Step_STEPPER_UPPER_Pin, GPIO_PIN_RESET);
+			} else {
+				step_gornego--;
+				out_gornego_stepp = 1;
+				HAL_GPIO_WritePin(Step_STEPPER_UPPER_GPIO_Port,
+				Step_STEPPER_UPPER_Pin, GPIO_PIN_SET);
+			}
+			if (step_gornego == step_gornego_fabrik) {
+				flaga_fabrik_gorny = 0;
+			}
 		}
 	}
 	if (htim == &htim10) {
