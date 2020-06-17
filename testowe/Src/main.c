@@ -390,11 +390,26 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 			if (step_gornego == step_gornego_fabrik) {
 				flaga_fabrik_gorny = 0;
 			}
+		} else if (flaga_fabrik_gorny == 2) {
+			if (out_gornego_stepp) {
+				out_gornego_stepp = 0;
+				HAL_GPIO_WritePin(Step_STEPPER_UPPER_GPIO_Port,
+				Step_STEPPER_UPPER_Pin, GPIO_PIN_RESET);
+			} else {
+				step_gornego++;
+				out_gornego_stepp = 1;
+				HAL_GPIO_WritePin(Step_STEPPER_UPPER_GPIO_Port,
+				Step_STEPPER_UPPER_Pin, GPIO_PIN_SET);
+			}
+			if (step_gornego == step_gornego_fabrik) {
+				flaga_fabrik_gorny = 0;
+			}
 		}
 	}
 	if (htim == &htim10) {
-		printf("X %.2f #%d \r\n", Hcsr04_Distance_tmp, H_sum);
-
+		printf("X %.2f #%d %d %d %f %f %f %s \r\n", Hcsr04_Distance_tmp, H_sum,
+				step_dolnego, step_gornego, a, b, s,tmp);
+//		printf("X %s 2 \r\n",tmp);
 
 	}
 	if (htim == &htim9) {
@@ -444,7 +459,10 @@ int main(void) {
 	flaga_servo_effector = 0;
 	step_dolnego = 12900;
 	step_gornego = 0;
-
+	struct Vector3D target;
+	step_dolnego_fabrik = 0;
+	step_gornego_fabrik = 0;
+	flaga_fabrik_dolny = 0;
 	char *token;
 
 
