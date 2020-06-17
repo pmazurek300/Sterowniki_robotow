@@ -614,15 +614,19 @@ int main(void) {
 				break;
 
 			case 6:
-
+				flaga_gornego_stepp = 2;
+				HAL_GPIO_WritePin(Dir_STEPPER_UPPER_GPIO_Port,
+				Dir_STEPPER_UPPER_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(En_STEPPER_UPPER_GPIO_Port,
+				En_STEPPER_UPPER_Pin, GPIO_PIN_SET);
 				break;
 
 			case 7:
-
+				flaga_servo_joint = 2;
 				break;
 
 			case 8:
-
+				flaga_servo_joint = 1;
 				break;
 
 			case 9:
